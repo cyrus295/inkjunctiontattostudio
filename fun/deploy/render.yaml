@@ -1,7 +1,7 @@
 services:
   # Backend Service
   - type: web
-    name: link-junction-tattoos-api
+    name: ink-junction-tattoos-api
     env: node
     buildCommand: cd server && npm install && npm run build
     startCommand: cd server && npm start
@@ -13,14 +13,14 @@ services:
       - key: MONGODB_URI
         sync: false # Set this in Render dashboard
       - key: FRONTEND_URL
-        value: https://link-junction-tattoos.onrender.com
+        value: https://ink-junction-tattoos.onrender.com
 
   # Frontend Service
   - type: web
-    name: link-junction-tattoos
+    name: ink-junction-tattoos
     env: static
     buildCommand: npm install && npm run build
     publishDir: dist
     envVars:
       - key: VITE_API_URL
-        value: https://link-junction-tattoos-api.onrender.com/api
+        value: https://ink-junction-tattoos-api.onrender.com/api
