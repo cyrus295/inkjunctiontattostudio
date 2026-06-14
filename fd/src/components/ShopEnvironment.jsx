@@ -1,15 +1,24 @@
 import React from "react";
+import { useData } from "../hooks/useData";
+
+const SOCKET_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : "http://localhost:5000";
 
 export function ShopEnvironment() {
-  // Using multiple video sources for a collage effect
-  // In a real scenario, these would be local video paths or unique URLs
+  const { content } = useData();
+  
+  const normalizeSrc = (src) => {
+    if (!src) return "/bgvideo.mp4";
+    if (src.startsWith('http') || src.startsWith('data:')) return src;
+    return `${SOCKET_URL}${src.startsWith('/') ? '' : '/'}${src}`;
+  };
+
   const videoSources = [
-    "/bgvideo.mp4",
-    "/bgvideo.mp4",
-    "/bgvideo.mp4",
-    "/bgvideo.mp4",
-    "/bgvideo.mp4",
-    "/bgvideo.mp4",
+    normalizeSrc(content.envMedia1),
+    normalizeSrc(content.envMedia2),
+    normalizeSrc(content.envMedia3),
+    normalizeSrc(content.envMedia4),
+    normalizeSrc(content.envMedia5),
+    normalizeSrc(content.envMedia6),
   ];
 
   return (
@@ -36,6 +45,7 @@ export function ShopEnvironment() {
           {/* Main Large Video */}
           <div className="col-span-2 row-span-2 relative overflow-hidden group rounded-sm">
             <video 
+              key={videoSources[0]}
               autoPlay 
               muted 
               loop 
@@ -53,6 +63,7 @@ export function ShopEnvironment() {
           {/* Side Videos */}
           <div className="relative overflow-hidden group rounded-sm">
             <video 
+              key={videoSources[1]}
               autoPlay 
               muted 
               loop 
@@ -66,6 +77,7 @@ export function ShopEnvironment() {
 
           <div className="relative overflow-hidden group rounded-sm hidden lg:block">
             <video 
+              key={videoSources[2]}
               autoPlay 
               muted 
               loop 
@@ -79,6 +91,7 @@ export function ShopEnvironment() {
 
           <div className="relative overflow-hidden group rounded-sm">
             <video 
+              key={videoSources[3]}
               autoPlay 
               muted 
               loop 
@@ -92,6 +105,7 @@ export function ShopEnvironment() {
 
           <div className="relative overflow-hidden group rounded-sm hidden md:block">
             <video 
+              key={videoSources[4]}
               autoPlay 
               muted 
               loop 
@@ -99,6 +113,20 @@ export function ShopEnvironment() {
               className="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
             >
               <source src={videoSources[4]} type="video/mp4" />
+            </video>
+            <div className="absolute inset-0 bg-black/50 group-hover:bg-transparent transition-colors duration-500" />
+          </div>
+
+          <div className="relative overflow-hidden group rounded-sm">
+            <video 
+              key={videoSources[5]}
+              autoPlay 
+              muted 
+              loop 
+              playsInline 
+              className="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+            >
+              <source src={videoSources[5]} type="video/mp4" />
             </video>
             <div className="absolute inset-0 bg-black/50 group-hover:bg-transparent transition-colors duration-500" />
           </div>

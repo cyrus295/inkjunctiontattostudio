@@ -1,54 +1,23 @@
 import { useState, useEffect } from "react";
-import { portfolioItems } from "../data/portfolio.js";
+import { useData } from "../hooks/useData";
 import { Play, Image as ImageIcon, ZoomIn, X } from "lucide-react";
 import { Button } from "../components/ui/button.jsx";
 
-const API_BASE_URL = "http://localhost:5000";
+const SOCKET_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : "http://localhost:5000";
 
 export function Portfolio() {
-  const [items, setItems] = useState(portfolioItems);
+  const { portfolio: items } = useData();
   const [visibleItems, setVisibleItems] = useState(12);
   const [zoomItem, setZoomItem] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
 
-  useEffect(() => {
-    const loadPortfolio = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/portfolio`);
-        if (!response.ok) throw new Error("Portfolio API request failed");
-        const data = await response.json();
-
-        const normalized = data.map((entry, index) => {
-          let src = entry.src;
-          if (!src.startsWith("http") && !src.startsWith("data:")) {
-            // Handle relative paths from DB
-            if (src.startsWith("/img")) {
-              src = `${API_BASE_URL}${src}`;
-            } else if (src.startsWith("img")) {
-              src = `${API_BASE_URL}/${src}`;
-            } else {
-              src = `${API_BASE_URL}/img/1/${src}`;
-            }
-          }
-          
-          return {
-            id: entry._id || entry.id || index,
-            type: entry.type ?? "image",
-            src: src,
-            style: entry.style ?? "Custom Design",
-            caption: entry.caption ?? "Ink Junction Art",
-          };
-        });
-
-        setItems(normalized.length > 0 ? normalized : portfolioItems);
-      } catch (error) {
-        console.warn("Portfolio API fetch failed, using fallback data", error);
-        setItems(portfolioItems);
-      }
-    };
-
-    loadPortfolio();
-  }, []);
+  const normalizeItem = (item) => {
+    let src = item.src;
+    if (!src.startsWith("http") && !src.startsWith("data:")) {
+      src = `${SOCKET_URL}${src.startsWith("/") ? "" : "/"}${src}`;
+    }
+    return { ...item, src };
+  };
 
   const loadMore = () => {
     setVisibleItems((prev) => Math.min(prev + 6, items.length));
@@ -75,33 +44,20 @@ export function Portfolio() {
         <div className={`flex gap-6 py-4 px-6 ${isPaused ? 'pause-marquee' : 'animate-marquee'}`}>
           {marqueeItems.map((item, index) => (
             <div 
-              key={`${item.id}-${index}`} 
+              key={`${item.id || item._id}-${index}`} 
               className="w-[300px] sm:w-[400px] flex-shrink-0"
             >
               <GalleryItem 
-                item={item} 
+                item={normalizeItem(item)} 
                 onZoom={(e) => {
                   e.stopPropagation();
-                  setZoomItem(item);
+                  setZoomItem(normalizeItem(item));
                 }} 
               />
             </div>
           ))}
         </div>
       </div>
-
-      {visibleItems < items.length && (
-        <div className="text-center mt-12">
-          <Button
-            onClick={loadMore}
-            variant="outline"
-            size="lg"
-            className="border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white px-8 py-6 rounded-full font-semibold"
-          >
-            Load More Work
-          </Button>
-        </div>
-      )}
 
       {/* Zoom Modal */}
       {zoomItem && (

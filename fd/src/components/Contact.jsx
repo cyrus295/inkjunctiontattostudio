@@ -1,10 +1,19 @@
 import { Phone, MapPin, MessageCircle, Map as MapIcon, Navigation } from "lucide-react";
 import { Button } from "../components/ui/button.jsx";
+import { useData } from "../hooks/useData";
 import { WHATSAPP_NUMBER, STUDIO_ADDRESS, GOOGLE_MAPS_URL, CLICKABLE_MAPS_URL } from "../utils/constants.js";
 
 export function Contact() {
+  const { content } = useData();
+  
+  const phone = content.phone || WHATSAPP_NUMBER;
+  const address = content.address || STUDIO_ADDRESS;
+  const hours = content.hours || "11AM - 9PM";
+  const mapsUrl = content.mapsUrl || GOOGLE_MAPS_URL;
+  const clickableMapsUrl = content.clickableMapsUrl || CLICKABLE_MAPS_URL;
+
   const openLocation = () => {
-    window.open(CLICKABLE_MAPS_URL, "_blank");
+    window.open(clickableMapsUrl, "_blank");
   };
 
   return (
@@ -40,7 +49,7 @@ export function Contact() {
                 </div>
                 
                 <p className="text-2xl text-white font-medium leading-tight max-w-sm">
-                  {STUDIO_ADDRESS}
+                  {address}
                 </p>
 
                 <Button 
@@ -57,13 +66,13 @@ export function Contact() {
             <div className="flex gap-12 pt-4">
               <div>
                 <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Call Us</p>
-                <a href={`tel:${WHATSAPP_NUMBER}`} className="text-xl text-white font-bold hover:text-green-500 transition-colors">
-                  {WHATSAPP_NUMBER}
+                <a href={`tel:${phone}`} className="text-xl text-white font-bold hover:text-green-500 transition-colors">
+                  {phone}
                 </a>
               </div>
               <div>
                 <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Hours</p>
-                <p className="text-xl text-white font-bold">11AM - 9PM</p>
+                <p className="text-xl text-white font-bold">{hours}</p>
               </div>
             </div>
           </div>
@@ -74,7 +83,8 @@ export function Contact() {
             <div className="relative aspect-square md:aspect-auto md:h-[600px] w-full bg-slate-900 rounded-[3rem] p-4 border border-white/10 shadow-2xl overflow-hidden group">
               <div className="absolute inset-0 grayscale contrast-125 brightness-75 group-hover:grayscale-0 transition-all duration-1000">
                 <iframe
-                  src={GOOGLE_MAPS_URL}
+                  key={mapsUrl}
+                  src={mapsUrl}
                   className="w-full h-full border-0"
                   allowFullScreen
                   loading="lazy"

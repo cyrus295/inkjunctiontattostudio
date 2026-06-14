@@ -1,18 +1,15 @@
 import React, { useState } from 'react';
 import { Instagram, MessageCircle, X, ExternalLink, Mail, MessageSquare } from 'lucide-react';
-import { WHATSAPP_NUMBER, STUDIO_EMAIL } from '../utils/constants.js';
+import { WHATSAPP_NUMBER, STUDIO_EMAIL, INSTAGRAM_URL } from '../utils/constants.js';
 
 export function SocialPopup() {
   const [isOpen, setIsOpen] = useState(false);
-
-  // Replace with your actual Instagram username
-  const INSTAGRAM_USERNAME = "inkjunction_tattoos"; 
 
   const socialLinks = [
     {
       name: "Instagram",
       icon: <Instagram className="w-8 h-8" />,
-      url: `https://www.instagram.com/${INSTAGRAM_USERNAME}/`,
+      url: INSTAGRAM_URL,
       color: "bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600",
       description: "Follow our latest work & updates"
     },
@@ -101,7 +98,7 @@ export function SocialPopup() {
           {/* Footer Info */}
           <div className="p-6 bg-slate-950/50 text-center">
             <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">
-              Ink Junction Tattoos • Professional Studio
+              Ink Junction Tattoo Studio • Professional Studio
             </p>
           </div>
         </div>

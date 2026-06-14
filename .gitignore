@@ -1,0 +1,25 @@
+# Monorepo root gitignore
+node_modules/
+.DS_Store
+*.log
+
+# Environment files — never commit real secrets
+.env
+bd/.env
+fd/.env
+
+# Frontend build output
+fd/dist/
+fd/build/
+
+# Uploaded media (use Cloudinary in production)
+bd/src/img/1/*.jpg
+bd/src/img/1/*.jpeg
+bd/src/img/1/*.png
+bd/src/img/1/*.webp
+bd/src/img/1/*.mp4
+bd/src/img/1/*.webm
+
+# Keep seed images
+!bd/src/img/1/mini/
+!bd/src/img/1/mini/*.jpeg

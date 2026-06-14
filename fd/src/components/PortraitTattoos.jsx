@@ -1,14 +1,29 @@
 import React, { useState } from 'react';
+import { useData } from "../hooks/useData";
 
-const portraitTattoos = [
-  { id: 1, src: "https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=800&q=80", caption: "Realistic Portrait 1" },
-  { id: 2, src: "https://images.unsplash.com/photo-1590246815117-6ca7632c2b11?w=800&q=80", caption: "Realistic Portrait 2" },
-  { id: 3, src: "https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=800&q=80", caption: "Realistic Portrait 3" },
+const SOCKET_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : "http://localhost:5000";
+
+const defaultPortraitTattoos = [
+  { id: 1, src: "https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=800&q=80", caption: "Realistic Portrait" },
+  { id: 2, src: "https://images.unsplash.com/photo-1590246815117-6ca7632c2b11?w=800&q=80", caption: "Detailed Portrait" },
+  { id: 3, src: "https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=800&q=80", caption: "Custom Portrait" },
 ];
 
 export function PortraitTattoos() {
+  const { portfolio } = useData();
   const [isPaused, setIsPaused] = useState(false);
-  const marqueeItems = [...portraitTattoos, ...portraitTattoos, ...portraitTattoos];
+
+  const portraitItems = portfolio.filter(item => 
+    item.style?.toLowerCase().includes('portrait')
+  );
+
+  const displayItems = portraitItems.length > 0 ? portraitItems : defaultPortraitTattoos;
+  const marqueeItems = [...displayItems, ...displayItems, ...displayItems];
+
+  const normalizeSrc = (src) => {
+    if (src.startsWith('http') || src.startsWith('data:')) return src;
+    return `${SOCKET_URL}${src.startsWith('/') ? '' : '/'}${src}`;
+  };
 
   return (
     <section className="py-20 bg-white overflow-hidden">
@@ -29,11 +44,11 @@ export function PortraitTattoos() {
         <div className={`flex gap-8 py-4 px-6 ${isPaused ? 'pause-marquee' : 'animate-marquee'}`}>
           {marqueeItems.map((item, index) => (
             <div 
-              key={`${item.id}-${index}`} 
+              key={`${item.id || item._id}-${index}`} 
               className="w-[300px] sm:w-[450px] flex-shrink-0 group relative overflow-hidden rounded-2xl shadow-xl"
             >
               <img 
-                src={item.src} 
+                src={normalizeSrc(item.src)} 
                 alt={item.caption} 
                 className="w-full h-[400px] sm:h-[550px] object-cover transition-transform duration-700 group-hover:scale-110"
               />

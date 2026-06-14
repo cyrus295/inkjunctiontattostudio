@@ -14,62 +14,62 @@ export const portfolioItems = [
     type: "image",
     src: tatto1,
     style: "Traditional",
-    caption: "Back piece — Client: Alex, 2024"
+    caption: "Back piece"
   },
   {
     id: 2,
     type: "image",
     src: tatto2,
     style: "Realism",
-    caption: "Portrait — Client: Jordan, 2023"
+    caption: "Portrait"
   },
   {
     id: 3,
     type: "image",
     src: tatto3,
     style: "Blackwork",
-    caption: "Sleeve — Client: Marcus, 2024"
+    caption: "Sleeve"
   },
   {
     id: 4,
     type: "image",
     src: tatto4,
     style: "Watercolor",
-    caption: "Forearm — Client: Sarah, 2023"
+    caption: "Forearm"
   },
   {
     id: 5,
     type: "image",
     src: tatto5,
     style: "Traditional",
-    caption: "Chest piece — Client: Mike, 2024"
+    caption: "Chest piece"
   },
   {
     id: 6,
     type: "image",
     src: tatto6,
     style: "Geometric",
-    caption: "Arm band — Client: Emma, 2023"
+    caption: "Arm band"
   },
   {
     id: 7,
     type: "image",
     src: tatto7,
     style: "Realism",
-    caption: "Thigh piece — Client: David, 2024"
+    caption: "Thigh piece"
   },
   {
     id: 8,
     type: "image",
     src: tatto8,
     style: "Japanese",
-    caption: "Back piece — Client: Lisa, 2023"
+    caption: "Back piece"
   },
   {
     id: 9,
     type: "image",
     src: tatto9,
     style: "Dotwork",
-    caption: "Hand — Client: Tom, 2024"
+    caption: "Hand"
   }
 ];

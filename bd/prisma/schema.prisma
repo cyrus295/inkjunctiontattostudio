@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Portfolio {
+  id        Int      @id @default(autoincrement())
+  type      String
+  src       String
+  beforeSrc String?
+  style     String
+  caption   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([style])
+}
+
+model Content {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  value       Json
+  category    String   @default("text")
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Offer {
+  id        Int      @id @default(autoincrement())
+  title     String
+  description String
+  type      String
+  src       String
+  isActive  Boolean  @default(true)
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -1,6 +1,5 @@
 import dotenv from "dotenv";
-import Portfolio from "./models/Portfolio.js";
-import { connectDB } from "./config/db.js";
+import { connectDB, prisma } from "./config/db.js";
 
 dotenv.config();
 
@@ -65,7 +64,7 @@ const seedData = [
     type: "image",
     src: `/img/${img}`,
     style: styles[index % styles.length],
-    caption: `Tattoo design ${index + 1}`
+    caption: `Custom ${styles[index % styles.length]} Design`
   })),
   ...videoItems
 ];
@@ -73,15 +72,16 @@ const seedData = [
 const seedDatabase = async () => {
   try {
     await connectDB();
-    
-    // Clear existing data
-    await Portfolio.deleteMany({});
+
+    await prisma.portfolio.deleteMany();
     console.log(" Cleared existing portfolio data");
-    
-    // Insert seed data
-    const insertedItems = await Portfolio.insertMany(seedData);
-    console.log(` Seeded ${insertedItems.length} portfolio items`);
-    
+
+    const insertedItems = await prisma.portfolio.createMany({
+      data: seedData,
+    });
+
+    console.log(` Seeded ${insertedItems.count} portfolio items`);
+    await prisma.$disconnect();
     process.exit(0);
   } catch (error) {
     console.error(" Error seeding database:", error);

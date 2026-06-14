@@ -1,29 +1,21 @@
-import mongoose from "mongoose";
+import dotenv from "dotenv";
+import { PrismaClient } from "@prisma/client";
+
+dotenv.config();
+
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL is not defined in environment variables");
+}
+
+export const prisma = new PrismaClient();
 
 export const connectDB = async () => {
   try {
-    const mongoURI = process.env.MONGODB_URI;
-    
-    if (!mongoURI) {
-      throw new Error("MONGODB_URI is not defined in environment variables");
-    }
-
-    await mongoose.connect(mongoURI, {
-      serverSelectionTimeoutMS: 5000,
-    });
-
-    console.log(" MongoDB connected successfully");
-    
-    mongoose.connection.on("error", (err) => {
-      console.error("MongoDB connection error:", err);
-    });
-
-    mongoose.connection.on("disconnected", () => {
-      console.log("MongoDB disconnected");
-    });
-
+    await prisma.$connect();
+    console.log(" PostgreSQL connected successfully");
   } catch (error) {
-    console.error("MongoDB connection failed:", error);
+    console.error("PostgreSQL connection failed:", error);
     throw error;
   }
 };

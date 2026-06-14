@@ -1,33 +1,38 @@
 import React, { useState } from 'react';
+import { useData } from "../hooks/useData";
 
-const coverupItems = [
-  {
-    id: 1,
-    before: "https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=400&q=80",
-    after: "https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=800&q=80",
-    title: "Tribal to Geometric Coverup"
-  },
-  {
-    id: 2,
-    before: "https://images.unsplash.com/photo-1590246815117-6ca7632c2b11?w=400&q=80",
-    after: "https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=800&q=80",
-    title: "Old Name to Realistic Rose"
-  }
-];
+const SOCKET_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : "http://localhost:5000";
 
 export function CoverupTattoos() {
+  const { portfolio } = useData();
   const [isPaused, setIsPaused] = useState(false);
+
+  const coverupItems = portfolio.filter(item => 
+    item.style?.toLowerCase().includes('coverup')
+  );
+
+  // If no items, don't show the section
+  if (coverupItems.length === 0) return null;
+
   const marqueeItems = [...coverupItems, ...coverupItems, ...coverupItems];
 
+  const normalizeSrc = (src) => {
+    if (!src) return "";
+    if (src.startsWith('http') || src.startsWith('data:')) return src;
+    return `${SOCKET_URL}${src.startsWith('/') ? '' : '/'}${src}`;
+  };
+
   return (
-    <section className="py-20 bg-slate-50 border-t border-slate-200 overflow-hidden">
+    <section id="coverup" className="py-24 bg-slate-50 border-t border-slate-200 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 text-center">
-        <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4 tracking-tight uppercase italic">
-          Coverup <span className="text-green-500">Tattoos</span>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 border border-green-500/30 rounded-full bg-green-500/5 mb-6">
+          <span className="text-green-500 text-[10px] font-black uppercase tracking-[0.3em]">The Transformation</span>
+        </div>
+        <h2 className="text-6xl md:text-8xl font-black text-slate-900 mb-4 tracking-tighter uppercase italic">
+          Coverup <span className="text-green-500">Magic</span>
         </h2>
-        <div className="w-24 h-1 bg-green-500 mx-auto mb-6"></div>
-        <p className="text-lg text-slate-600 max-w-2xl mx-auto font-medium">
-          Transforming old regrets into new masterpieces.
+        <p className="text-xl text-slate-600 max-w-2xl mx-auto font-medium italic">
+          "Witness the evolution from old ink to new masterpieces."
         </p>
       </div>
 
@@ -35,36 +40,58 @@ export function CoverupTattoos() {
         className="relative flex whitespace-nowrap overflow-x-auto scrollbar-hide group cursor-grab active:cursor-grabbing"
         onClick={() => setIsPaused(!isPaused)}
       >
-        <div className={`flex gap-12 py-4 px-6 ${isPaused ? 'pause-marquee' : 'animate-marquee'}`}>
+        <div className={`flex gap-12 py-4 px-6 ${isPaused ? 'pause-marquee' : 'animate-marquee-slow'}`}>
           {marqueeItems.map((item, index) => (
             <div 
-              key={`${item.id}-${index}`} 
-              className="w-[350px] sm:w-[600px] flex-shrink-0 bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-100"
+              key={`${item._id}-${index}`} 
+              className="w-[350px] sm:w-[800px] flex-shrink-0 bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100"
             >
-              <div className="grid grid-cols-2 gap-4">
-                <div className="relative group/media">
-                  <div className="absolute top-3 left-3 z-10 bg-black/60 text-white px-3 py-1 rounded-full text-[10px] font-black tracking-widest backdrop-blur-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 h-full">
+                {/* Before Image */}
+                <div className="relative group/before aspect-[4/5] sm:aspect-auto overflow-hidden rounded-3xl bg-slate-200">
+                  {item.beforeSrc ? (
+                    <img 
+                      src={normalizeSrc(item.beforeSrc)} 
+                      alt="Before" 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover/before:scale-105"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold italic">
+                      No Before Image
+                    </div>
+                  )}
+                  <div className="absolute top-4 left-4 z-10 bg-black/80 text-white px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest shadow-lg">
                     BEFORE
                   </div>
-                  <img 
-                    src={item.before} 
-                    alt="Before" 
-                    className="w-full h-[250px] sm:h-[350px] object-cover rounded-3xl grayscale"
-                  />
                 </div>
-                <div className="relative group/media">
-                  <div className="absolute top-3 left-3 z-10 bg-green-600 text-white px-3 py-1 rounded-full text-[10px] font-black tracking-widest">
+
+                {/* After Image/Video */}
+                <div className="relative group/after aspect-[4/5] sm:aspect-auto overflow-hidden rounded-3xl bg-slate-900">
+                  {item.type === "video" ? (
+                    <video
+                      src={normalizeSrc(item.src)}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img 
+                      src={normalizeSrc(item.src)} 
+                      alt="After" 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover/after:scale-105"
+                    />
+                  )}
+                  <div className="absolute top-4 left-4 z-10 bg-green-600 text-white px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest shadow-lg">
                     AFTER
                   </div>
-                  <img 
-                    src={item.after} 
-                    alt="After" 
-                    className="w-full h-[250px] sm:h-[350px] object-cover rounded-3xl shadow-lg"
-                  />
                 </div>
               </div>
-              <div className="text-center mt-6">
-                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter italic">{item.title}</h3>
+              
+              <div className="text-center mt-8">
+                <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter italic">{item.caption}</h3>
+                <div className="w-12 h-1 bg-green-500 mx-auto mt-3"></div>
               </div>
             </div>
           ))}

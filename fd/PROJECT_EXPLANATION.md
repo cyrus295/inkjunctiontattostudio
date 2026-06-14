@@ -1,43 +1,43 @@
 # Ink Junction Tattoo Studio - Frontend Documentation
 
 ## Project Overview
-Ink Junction Tattoo Studio is a premium, modern portfolio website for a professional tattoo studio. It features a high-end aesthetic with a focus on visual storytelling and seamless user interaction.
+Ink Junction Tattoo Studio is a premium, real-time portfolio website. It includes a public-facing gallery and a private Admin Panel for instant content updates without any authentication required.
 
 ## Technology Stack
 - **Framework**: React.js (Vite)
+- **Routing**: React Router
+- **Real-time**: Socket.IO Client
+- **API Client**: Axios
 - **Styling**: Tailwind CSS
 - **Icons**: Lucide React
 - **Animations**: Tailwind Animate, Custom CSS Marquees
-- **State Management**: React Hooks (useState, useEffect, useRef)
 
 ## Key Features & How They Work
 
-### 1. Dynamic Hero Section
-- **Background**: Uses a continuous video loop (`/bgvideo.mp4`) with a dark overlay for readability.
-- **Booking Popup**: A dual-action modal that lets users choose between WhatsApp and a Phone Call. It uses a high-contrast black theme with backdrop blurring.
+### 1. Admin Management Panel (`/admin`)
+- **Real-time Updates**: Changes to text or images are broadcast to all visitors immediately using Socket.IO.
+- **Media Uploads**: Integrated file upload system for adding new tattoos and updating videos.
+- **Dynamic Content**: Manage Hero text, Artist details, and Contact info directly from the dashboard.
 
-### 2. Auto-Scrolling Portfolio Marquees
-- **Mechanism**: Custom CSS `@keyframes marquee` in `index.css`.
-- **Interaction**: Sections like "Our Portfolio", "Portrait Tattoos", and "Coverup Tattoos" slide automatically. Users can click to pause the animation or manually scroll using touch/mouse.
-- **Components**: `Portfolio.jsx`, `PortraitTattoos.jsx`, `CoverupTattoos.jsx`.
+### 2. useData Custom Hook
+- **Centralized Data**: Manages the state for both portfolio items and global content.
+- **Robustness**: Automatically switches to local `portfolio.js` fallback if the backend is offline.
+- **Real-time Sync**: Listens for server events to keep the UI perfectly synced with the database.
 
-### 3. Shop Environment Collage
-- **Mechanism**: A CSS Grid layout (`ShopEnvironment.jsx`) featuring multiple videos with grayscale-to-color transitions on hover.
+### 3. Dynamic Sections
+- **Hero**: Displays live titles and background videos from the admin settings.
+- **Portfolio Marquees**: Auto-scrolling galleries that reflect the latest database entries instantly.
+- **Artist & Contact**: Sections that update their text and images based on admin configuration.
 
-### 4. Floating Social Popup
-- **Mechanism**: A fixed-position button (`SocialPopup.jsx`) with a bouncing animation.
-- **Function**: Opens a mini-frame providing direct links to Instagram and WhatsApp without requiring internal login.
-
-### 5. Loading Screen
-- **Mechanism**: A 2-second timer in `App.jsx` that displays `LoadingScreen.jsx` before revealing the main site content.
+### 4. Seamless Navigation
+- **Public/Admin Split**: Uses React Router to manage paths while maintaining a unified styling.
+- **Smooth Scroll**: Internal navigation glides to sections like "#portfolio" or "#contact".
 
 ## Mobile Optimization
-- The project follows a mobile-first approach.
-- Hamburger menu (3 lines) for navigation on smaller screens.
-- Stacked layouts for portfolio items and contact details on mobile devices.
-- Touch-friendly buttons and interactive elements.
+- **Responsive Admin**: The dashboard is designed to work on tablets and desktop.
+- **Public Site**: Fully mobile-first with touch-friendly marquees and a floating "Book Now" popup.
 
 ## Connectivity
-- **Backend Integration**: Fetches portfolio data from `http://localhost:5000/api/portfolio`.
-- **Robustness**: Includes fallback logic to local `portfolio.js` data if the backend server is offline or errors occur.
-- **WhatsApp**: Uses the `WHATSAPP_NUMBER` constant to generate direct chat links.
+- **Backend URL**: Configured via `.env` (`VITE_API_URL`, `VITE_SOCKET_URL`).
+- **Real-time Engine**: Connects to the backend Socket.IO server for bi-directional updates.
+- **Media Handling**: Efficiently loads images and videos from the backend's static file server.

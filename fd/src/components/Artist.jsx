@@ -1,6 +1,22 @@
 import React from 'react';
+import { useData } from "../hooks/useData";
+
+const SOCKET_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : "http://localhost:5000";
 
 export function Artist() {
+  const { content } = useData();
+  
+  const normalizeSrc = (src, fallback) => {
+    if (!src) return fallback;
+    if (src.startsWith('http') || src.startsWith('data:')) return src;
+    return `${SOCKET_URL}${src.startsWith('/') ? '' : '/'}${src}`;
+  };
+
+  const artistName = content.artistName || "VISHAL KUMAR";
+  const artistBio = content.artistBio || "\"Turning skin into a living, breathing canvas of art.\"";
+  const artistImage = normalizeSrc(content.artistImage, "https://images.unsplash.com/photo-1590246815117-6ca7632c2b11?w=800&q=80");
+  const shopVideo = normalizeSrc(content.shopVideo, "/bgvideo.mp4");
+
   return (
     <section className="py-24 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -11,7 +27,7 @@ export function Artist() {
             <div className="absolute -inset-4 bg-green-500/10 rounded-[3rem] rotate-3 blur-2xl" />
             <div className="relative aspect-[4/5] overflow-hidden rounded-[2.5rem] shadow-2xl border-8 border-slate-50">
               <img 
-                src="https://images.unsplash.com/photo-1590246815117-6ca7632c2b11?w=800&q=80" 
+                src={artistImage} 
                 alt="The Artist" 
                 className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000"
               />
@@ -30,25 +46,26 @@ export function Artist() {
             </div>
             
             <h2 className="text-6xl md:text-8xl font-black text-slate-900 leading-none uppercase tracking-tighter italic">
-              VISHAL <br />
-              <span className="text-green-500">KUMAR</span>
+              {artistName.split(' ')[0]} <br />
+              <span className="text-green-500">{artistName.split(' ').slice(1).join(' ')}</span>
             </h2>
 
             <p className="text-xl md:text-2xl text-slate-500 font-medium tracking-wide uppercase italic">
-              "Turning skin into a living, <br /> breathing canvas of art."
+              {artistBio}
             </p>
 
             {/* Loop Video in Circle */}
             <div className="absolute top-0 right-0 -mr-4 md:-mr-12 mt-4 hidden lg:block">
               <div className="relative w-48 h-48 rounded-full overflow-hidden border-4 border-green-500/30 shadow-2xl">
                 <video
+                  key={shopVideo}
                   autoPlay
                   muted
                   loop
                   playsInline
                   className="w-full h-full object-cover"
                 >
-                  <source src="/bgvideo.mp4" type="video/mp4" />
+                  <source src={shopVideo} type="video/mp4" />
                 </video>
                 <div className="absolute inset-0 bg-black/20" />
               </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Menu, X, Instagram, Phone, MessageCircle, ArrowDown, Mail, MessageSquare } from "lucide-react";
-import { WHATSAPP_NUMBER } from "../utils/constants.js";
+import { WHATSAPP_NUMBER, INSTAGRAM_URL } from "../utils/constants.js";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,6 +18,7 @@ export function Navbar() {
   const navLinks = [
     { name: "Home", href: "#" },
     { name: "Portfolio", href: "#portfolio" },
+    { name: "Offers", href: "#offers" },
     { name: "The Studio", href: "#shop" },
     { name: "Contact", href: "#contact" },
   ];
@@ -50,79 +51,59 @@ export function Navbar() {
 
   return (
     <nav 
-      className={`fixed top-0 left-0 w-full z-[100] transition-all duration-700 ${
-        scrolled ? "bg-black/95 backdrop-blur-2xl py-3 border-b border-white/5 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.5)]" : "bg-transparent py-6"
+      className={`fixed top-0 left-0 w-full z-[100] transition-all duration-1000 ${
+        scrolled 
+          ? "bg-black/95 backdrop-blur-3xl py-4 border-b border-white/10 shadow-2xl" 
+          : "bg-black py-8"
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         {/* Logo */}
-        <div className="flex items-center gap-4 group cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
-          <div className="relative w-12 h-12 rounded-full border border-white/10 overflow-hidden transition-all duration-500 group-hover:border-green-500/50 group-hover:scale-105 shadow-xl">
+        <div className="flex items-center gap-5 group cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
+          <div className="relative w-14 h-14 rounded-full border border-white/20 overflow-hidden transition-all duration-700 group-hover:border-green-500/50 group-hover:scale-105">
             <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           </div>
           <div className="flex flex-col">
-            <span className="text-white font-black tracking-[0.25em] text-xs md:text-lg uppercase italic group-hover:text-green-500 transition-all duration-300">
+            <span className="text-white font-black tracking-[0.3em] text-sm md:text-xl uppercase group-hover:text-green-500 transition-all duration-500">
               Ink Junction
             </span>
-            <span className="text-green-500/50 font-bold tracking-[0.1em] text-[8px] md:text-[10px] uppercase -mt-1 group-hover:text-green-500 transition-all duration-300">
+            <span className="text-slate-400 font-bold tracking-[0.2em] text-[8px] md:text-[10px] uppercase group-hover:text-green-500 transition-all duration-500">
               Tattoo Studio
             </span>
           </div>
         </div>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-12">
+        <div className="hidden md:flex items-center gap-14">
           {navLinks.map((link) => (
             <a
               key={link.name}
               href={link.href}
               onClick={(e) => scrollToSection(e, link.href)}
-              className="text-white/60 hover:text-white text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-300 relative group"
+              className="text-white/50 hover:text-white text-[10px] font-black uppercase tracking-[0.4em] transition-all duration-500 relative group"
             >
               {link.name}
-              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-green-500 group-hover:w-full transition-all duration-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)]"></span>
+              <span className="absolute -bottom-2 left-0 w-0 h-[1px] bg-green-500 group-hover:w-full transition-all duration-700"></span>
             </a>
           ))}
         </div>
 
         {/* Right Side Info */}
-        <div className="hidden lg:flex items-center gap-6">
-          <div className="flex items-center gap-4">
-            <a 
-              href="https://instagram.com/inkjunction_tattoos" 
-              target="_blank" 
-              className="text-white/70 hover:text-green-500 transition-all duration-300 hover:scale-110"
-              title="Instagram"
-            >
-              <Instagram size={20} />
-            </a>
-            <a 
-              href={`https://wa.me/${WHATSAPP_NUMBER}`} 
-              target="_blank" 
-              className="text-white/70 hover:text-green-500 transition-all duration-300 hover:scale-110"
-              title="WhatsApp"
-            >
-              <MessageCircle size={20} />
-            </a>
-            <a 
-              href={`sms:${WHATSAPP_NUMBER}`} 
-              className="text-white/70 hover:text-green-500 transition-all duration-300 hover:scale-110"
-              title="SMS"
-            >
-              <MessageSquare size={20} />
-            </a>
-          </div>
-          <div className="h-4 w-[1px] bg-white/20"></div>
+        <div className="hidden lg:flex items-center gap-8">
+          <a 
+            href={INSTAGRAM_URL} 
+            target="_blank" 
+            className="text-white/50 hover:text-green-500 transition-all duration-500 hover:scale-110"
+            title="Instagram"
+          >
+            <Instagram size={22} />
+          </a>
+          <div className="h-6 w-[1px] bg-white/10"></div>
           <button 
             onClick={() => setShowBookingPopup(true)}
-            className="group relative px-6 py-2 overflow-hidden rounded-full bg-white/5 border border-white/10 hover:border-green-500/50 transition-all duration-500"
+            className="px-8 py-3 rounded-sm bg-transparent border border-white/20 hover:border-green-500 text-white font-black text-[10px] tracking-[0.3em] uppercase transition-all duration-700 hover:bg-green-500 hover:text-black"
           >
-            <div className="absolute inset-0 bg-green-500 translate-y-[101%] group-hover:translate-y-0 transition-transform duration-500" />
-            <span className="relative flex items-center gap-2 text-white font-black text-[10px] tracking-[0.2em] uppercase group-hover:text-black transition-colors duration-500">
-              <Phone size={12} />
-              Book Now
-            </span>
+            Book Now
           </button>
         </div>
 
@@ -169,7 +150,7 @@ export function Navbar() {
         </button>
 
         <div className="mt-8 flex gap-8">
-           <a href="https://instagram.com/inkjunction_tattoos" target="_blank">
+           <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
             <Instagram className="text-white w-8 h-8" />
            </a>
            <div className="text-green-500 font-black tracking-widest text-xl uppercase italic">Ink Junction</div>
