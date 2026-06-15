@@ -41,11 +41,11 @@ export function ShopEnvironment() {
             muted
             loop
             playsInline
-            className="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100"
+            className="absolute inset-0 w-full h-full object-cover transition-all duration-700 scale-105 group-hover:scale-100"
           >
             <source src={envVideo} type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors duration-500" />
+          <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500" />
           <div className="absolute bottom-6 left-6 z-10">
             <span className="text-white text-xs font-bold tracking-[0.3em] uppercase bg-green-600 px-3 py-1">
               Studio Floor

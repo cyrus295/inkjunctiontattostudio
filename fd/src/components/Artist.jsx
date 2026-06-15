@@ -14,7 +14,7 @@ export function Artist() {
 
   const artistName = content.artistName || "POVARASAN";
   const artistBio = content.artistBio || "\"Turning skin into a living, breathing canvas of art.\"";
-  const artistImage = normalizeSrc(content.artistImage, "/artist.jpg");
+  const artistImage = normalizeSrc(content.artistImage, "/artits.jpeg");
 
   return (
     <section className="py-24 bg-white overflow-hidden">
