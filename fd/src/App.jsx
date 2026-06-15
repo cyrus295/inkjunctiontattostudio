@@ -96,7 +96,8 @@ function App() {
             </div>
             <Offers />
             <PortraitTattoos />
-            <CoverupTattoos />
+            {/* CoverupTattoos hidden — will be re-enabled later */}
+            {/* <CoverupTattoos /> */}
             <ShopEnvironment />
             <Artist />
             <Contact />

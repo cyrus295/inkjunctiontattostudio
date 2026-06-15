@@ -262,7 +262,6 @@ const AdminPanel = () => {
           <nav className="space-y-2 sticky top-28">
             {[
               { id: "portfolio", label: "Portfolio", icon: LayoutDashboard },
-              { id: "coverup", label: "Coverup", icon: ImageIcon },
               { id: "media", label: "Media Hub", icon: Video },
               { id: "offers", label: "Active Offers", icon: Tag },
             ].map((tab) => (
