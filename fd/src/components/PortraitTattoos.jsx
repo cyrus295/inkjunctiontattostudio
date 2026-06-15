@@ -26,9 +26,11 @@ export function PortraitTattoos() {
   const { portfolio } = useData();
   const [isPaused, setIsPaused] = useState(false);
 
-  // Use database items if available, otherwise use local files
+  // Always show local /port/ files as base
+  // Only override with DB items if they have http/cloudinary URLs (not local /img/ paths)
   const portraitItems = portfolio.filter(item =>
-    item.style?.toLowerCase().includes('portrait')
+    item.style?.toLowerCase().includes('portrait') &&
+    item.src?.startsWith('http')
   );
   const displayItems = portraitItems.length > 0 ? portraitItems : defaultPortraitTattoos;
 
