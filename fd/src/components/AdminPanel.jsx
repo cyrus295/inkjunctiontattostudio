@@ -11,7 +11,10 @@ const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("portfolio");
   const [editingItem, setEditingItem] = useState(null);
   const [newItem, setNewItem] = useState({ type: "image", src: "", beforeSrc: "", style: "Traditional", caption: "" });
-  
+
+  // Dedicated Coverup state — completely separate from portfolio
+  const [newCoverup, setNewCoverup] = useState({ caption: "", beforeSrc: "", src: "" });
+
   // Offer State
   const [editingOffer, setEditingOffer] = useState(null);
   const [newOffer, setNewOffer] = useState({ title: "", description: "", type: "image", src: "", isActive: true, expiresAt: "" });
@@ -149,6 +152,44 @@ const AdminPanel = () => {
       showAlert("success", "Content updated!");
       refreshData();
     } catch (error) { showAlert("error", "Failed to update content."); }
+  };
+
+  // Dedicated Coverup upload handler
+  const handleCoverupUpload = async (e, field) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    setUploading(true);
+    try {
+      const res = await axios.post(`${API_URL}/upload`, formData);
+      setNewCoverup(prev => ({ ...prev, [field]: res.data.url }));
+      showAlert("success", `${field === "beforeSrc" ? "Before" : "After"} image uploaded!`);
+    } catch {
+      showAlert("error", "Upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleAddCoverup = async () => {
+    if (!newCoverup.beforeSrc || !newCoverup.src || !newCoverup.caption) {
+      return showAlert("error", "Please add title, before image and after image");
+    }
+    try {
+      await axios.post(`${API_URL}/portfolio`, {
+        type: "image",
+        src: newCoverup.src,
+        beforeSrc: newCoverup.beforeSrc,
+        style: "Coverup",
+        caption: newCoverup.caption,
+      });
+      setNewCoverup({ caption: "", beforeSrc: "", src: "" });
+      showAlert("success", "Coverup published!");
+      refreshData();
+    } catch {
+      showAlert("error", "Failed to publish coverup.");
+    }
   };
 
   const MediaUploadField = ({ label, contentKey, type = "video" }) => {
@@ -339,61 +380,87 @@ const AdminPanel = () => {
 
           {activeTab === "coverup" && (
             <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              {/* Add Coverup Item */}
+
+              {/* Add Coverup Card */}
               <div className="bg-black border border-white/5 rounded-sm shadow-2xl overflow-hidden">
                 <div className="px-10 py-8 border-b border-white/5 bg-zinc-950/50">
                   <h2 className="font-black text-white uppercase tracking-widest text-sm">Add Coverup — Before & After</h2>
+                  <p className="text-slate-500 text-xs mt-1">Upload the old tattoo photo as BEFORE and the new tattoo as AFTER</p>
                 </div>
-                <div className="p-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
-                  <div className="space-y-8">
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mb-3">Title</label>
-                      <input type="text" value={newItem.style === "Coverup" ? newItem.caption : ""} onChange={(e) => setNewItem({...newItem, caption: e.target.value, style: "Coverup"})} placeholder="e.g. Rose Sleeve Transformation" className="w-full bg-[#0a0a0a] border border-white/10 rounded-sm px-5 py-4 text-white focus:border-white outline-none transition-all" />
+
+                <div className="p-10 space-y-8">
+                  {/* Title */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mb-3">Title / Caption</label>
+                    <input
+                      type="text"
+                      value={newCoverup.caption}
+                      onChange={(e) => setNewCoverup(prev => ({ ...prev, caption: e.target.value }))}
+                      placeholder="e.g. Rose Sleeve Transformation"
+                      className="w-full bg-[#0a0a0a] border border-white/10 rounded-sm px-5 py-4 text-white focus:border-white outline-none transition-all"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    {/* BEFORE Upload */}
+                    <div className="space-y-4">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">
+                        Before Image <span className="text-red-500">(old tattoo)</span>
+                      </label>
+                      <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-white/20 rounded-sm cursor-pointer hover:border-white/40 transition-all bg-zinc-950/50 group">
+                        {newCoverup.beforeSrc ? (
+                          <div className="relative w-full h-full">
+                            <img src={newCoverup.beforeSrc} className="w-full h-full object-cover rounded-sm" />
+                            <div className="absolute top-2 left-2 bg-black/80 text-white px-3 py-1 rounded-full text-[10px] font-black tracking-widest">BEFORE</div>
+                            <button
+                              type="button"
+                              onClick={(e) => { e.preventDefault(); setNewCoverup(prev => ({ ...prev, beforeSrc: "" })); }}
+                              className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full hover:bg-red-500"
+                            ><X size={12} /></button>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center gap-3 text-slate-500 group-hover:text-white transition-colors">
+                            <Upload size={32} />
+                            <span className="text-xs font-bold uppercase tracking-widest">Click to upload BEFORE</span>
+                          </div>
+                        )}
+                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleCoverupUpload(e, "beforeSrc")} />
+                      </label>
                     </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mb-3">Before Image</label>
-                      <div className="flex gap-4">
-                        <input type="text" value={newItem.beforeSrc} onChange={(e) => setNewItem({...newItem, beforeSrc: e.target.value, style: "Coverup"})} placeholder="Before image URL..." className="flex-1 bg-[#0a0a0a] border border-white/10 rounded-sm px-5 py-4 text-white focus:border-white outline-none transition-all" />
-                        <label className="cursor-pointer bg-slate-700 hover:bg-slate-600 text-white px-6 flex items-center justify-center rounded-sm transition-all shadow-lg active:scale-95">
-                          <Upload size={18} />
-                          <input type="file" className="hidden" onChange={(e) => handleFileUpload(e, "portfolio", true, null, true)} />
-                        </label>
-                      </div>
-                      {newItem.beforeSrc && (
-                        <div className="mt-3 relative aspect-video rounded-sm overflow-hidden bg-black border border-white/10">
-                          <img src={newItem.beforeSrc?.startsWith('http') ? newItem.beforeSrc : `${SOCKET_URL}${newItem.beforeSrc}`} className="w-full h-full object-cover" />
-                          <div className="absolute top-2 left-2 bg-black/80 text-white px-3 py-1 rounded-full text-[10px] font-black tracking-widest">BEFORE</div>
-                        </div>
-                      )}
+
+                    {/* AFTER Upload */}
+                    <div className="space-y-4">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">
+                        After Image <span className="text-green-500">(new tattoo)</span>
+                      </label>
+                      <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-white/20 rounded-sm cursor-pointer hover:border-green-500/40 transition-all bg-zinc-950/50 group">
+                        {newCoverup.src ? (
+                          <div className="relative w-full h-full">
+                            <img src={newCoverup.src} className="w-full h-full object-cover rounded-sm" />
+                            <div className="absolute top-2 left-2 bg-green-600 text-white px-3 py-1 rounded-full text-[10px] font-black tracking-widest">AFTER</div>
+                            <button
+                              type="button"
+                              onClick={(e) => { e.preventDefault(); setNewCoverup(prev => ({ ...prev, src: "" })); }}
+                              className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full hover:bg-red-500"
+                            ><X size={12} /></button>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center gap-3 text-slate-500 group-hover:text-green-500 transition-colors">
+                            <Upload size={32} />
+                            <span className="text-xs font-bold uppercase tracking-widest">Click to upload AFTER</span>
+                          </div>
+                        )}
+                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleCoverupUpload(e, "src")} />
+                      </label>
                     </div>
                   </div>
-                  <div className="space-y-8">
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mb-3">After Image / Video</label>
-                      <div className="flex gap-4">
-                        <input type="text" value={newItem.style === "Coverup" ? newItem.src : ""} onChange={(e) => setNewItem({...newItem, src: e.target.value, style: "Coverup"})} placeholder="After image URL..." className="flex-1 bg-[#0a0a0a] border border-white/10 rounded-sm px-5 py-4 text-white focus:border-white outline-none transition-all" />
-                        <label className="cursor-pointer bg-green-600 hover:bg-green-500 text-black px-6 flex items-center justify-center rounded-sm transition-all shadow-lg active:scale-95">
-                          <Upload size={18} />
-                          <input type="file" className="hidden" onChange={(e) => { setNewItem({...newItem, style: "Coverup"}); handleFileUpload(e, "portfolio", true); }} />
-                        </label>
-                      </div>
-                      {newItem.src && newItem.style === "Coverup" && (
-                        <div className="mt-3 relative aspect-video rounded-sm overflow-hidden bg-black border border-white/10">
-                          <img src={newItem.src?.startsWith('http') ? newItem.src : `${SOCKET_URL}${newItem.src}`} className="w-full h-full object-cover" />
-                          <div className="absolute top-2 left-2 bg-green-600 text-white px-3 py-1 rounded-full text-[10px] font-black tracking-widest">AFTER</div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
                 </div>
+
                 <div className="px-10 py-8 bg-zinc-950/50 border-t border-white/5 flex justify-end">
                   <button
-                    onClick={() => {
-                      setNewItem({...newItem, style: "Coverup"});
-                      handleAddPortfolio();
-                    }}
-                    disabled={uploading}
-                    className="bg-white hover:bg-slate-200 text-black px-12 py-4 rounded-sm font-bold uppercase tracking-[0.2em] text-xs transition-all flex items-center gap-4 disabled:opacity-50"
+                    onClick={handleAddCoverup}
+                    disabled={uploading || !newCoverup.beforeSrc || !newCoverup.src || !newCoverup.caption}
+                    className="bg-white hover:bg-slate-200 text-black px-12 py-4 rounded-sm font-bold uppercase tracking-[0.2em] text-xs transition-all flex items-center gap-4 disabled:opacity-40"
                   >
                     <Plus size={18} />
                     {uploading ? "Uploading..." : "Publish Coverup"}
@@ -402,25 +469,40 @@ const AdminPanel = () => {
               </div>
 
               {/* Existing Coverup Items */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {portfolio.filter(item => item.style?.toLowerCase() === "coverup").map((item) => (
-                  <div key={item._id} className="bg-black border border-white/5 rounded-sm overflow-hidden group hover:border-white/20 transition-all duration-500">
-                    <div className="grid grid-cols-2 gap-2 p-4 bg-zinc-950/50">
-                      <div className="relative aspect-square rounded-sm overflow-hidden bg-zinc-900">
-                        <img src={item.beforeSrc?.startsWith('http') ? item.beforeSrc : `${SOCKET_URL}${item.beforeSrc}`} className="w-full h-full object-cover" />
-                        <div className="absolute top-2 left-2 bg-black/80 text-white px-2 py-0.5 rounded-full text-[9px] font-black">BEFORE</div>
+              <div>
+                <h3 className="font-black text-white uppercase tracking-widest text-sm mb-6">Published Coverups</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {portfolio.filter(item => item.style?.toLowerCase() === "coverup").map((item) => (
+                    <div key={item._id} className="bg-black border border-white/5 rounded-sm overflow-hidden hover:border-white/20 transition-all duration-500">
+                      <div className="grid grid-cols-2 gap-1">
+                        <div className="relative aspect-square overflow-hidden bg-zinc-900">
+                          {item.beforeSrc ? (
+                            <img src={item.beforeSrc?.startsWith('http') ? item.beforeSrc : `${SOCKET_URL}${item.beforeSrc}`} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-600 text-xs">No before</div>
+                          )}
+                          <div className="absolute top-2 left-2 bg-black/80 text-white px-2 py-0.5 rounded-full text-[9px] font-black">BEFORE</div>
+                        </div>
+                        <div className="relative aspect-square overflow-hidden bg-zinc-900">
+                          <img src={item.src?.startsWith('http') ? item.src : `${SOCKET_URL}${item.src}`} className="w-full h-full object-cover" />
+                          <div className="absolute top-2 left-2 bg-green-600 text-white px-2 py-0.5 rounded-full text-[9px] font-black">AFTER</div>
+                        </div>
                       </div>
-                      <div className="relative aspect-square rounded-sm overflow-hidden bg-zinc-900">
-                        <img src={item.src?.startsWith('http') ? item.src : `${SOCKET_URL}${item.src}`} className="w-full h-full object-cover" />
-                        <div className="absolute top-2 left-2 bg-green-600 text-white px-2 py-0.5 rounded-full text-[9px] font-black">AFTER</div>
+                      <div className="p-4 flex justify-between items-center bg-zinc-950/50">
+                        <p className="text-xs font-bold text-white uppercase tracking-widest truncate">{item.caption}</p>
+                        <button onClick={() => handleDeletePortfolio(item._id)} className="bg-red-600/10 text-red-500 p-2 rounded-sm hover:bg-red-600 hover:text-white transition-all ml-4 flex-shrink-0">
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </div>
-                    <div className="p-4 flex justify-between items-center">
-                      <p className="text-xs font-bold text-white uppercase tracking-widest truncate">{item.caption}</p>
-                      <button onClick={() => handleDeletePortfolio(item._id)} className="bg-red-600/10 text-red-500 p-2 rounded-sm hover:bg-red-600 hover:text-white transition-all ml-4"><Trash2 size={16} /></button>
+                  ))}
+                  {portfolio.filter(item => item.style?.toLowerCase() === "coverup").length === 0 && (
+                    <div className="col-span-2 text-center py-16 text-slate-600 border border-white/5 rounded-sm">
+                      <p className="font-bold uppercase tracking-widest text-sm">No coverup items yet</p>
+                      <p className="text-xs mt-2">Add your first before & after above</p>
                     </div>
-                  </div>
-                ))}
+                  )}
+                </div>
               </div>
             </div>
           )}
