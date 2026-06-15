@@ -12,9 +12,9 @@ export function Artist() {
     return `${SOCKET_URL}${src.startsWith('/') ? '' : '/'}${src}`;
   };
 
-  const artistName = content.artistName || "VISHAL KUMAR";
+  const artistName = content.artistName || "POVARASAN";
   const artistBio = content.artistBio || "\"Turning skin into a living, breathing canvas of art.\"";
-  const artistImage = normalizeSrc(content.artistImage, "https://images.unsplash.com/photo-1590246815117-6ca7632c2b11?w=800&q=80");
+  const artistImage = normalizeSrc(content.artistImage, "/artist.jpg");
   const shopVideo = normalizeSrc(content.shopVideo, "/bgvideo.mp4");
 
   return (
@@ -53,23 +53,6 @@ export function Artist() {
             <p className="text-xl md:text-2xl text-slate-500 font-medium tracking-wide uppercase italic">
               {artistBio}
             </p>
-
-            {/* Loop Video in Circle */}
-            <div className="absolute top-0 right-0 -mr-4 md:-mr-12 mt-4 hidden lg:block">
-              <div className="relative w-48 h-48 rounded-full overflow-hidden border-4 border-green-500/30 shadow-2xl">
-                <video
-                  key={shopVideo}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  className="w-full h-full object-cover"
-                >
-                  <source src={shopVideo} type="video/mp4" />
-                </video>
-                <div className="absolute inset-0 bg-black/20" />
-              </div>
-            </div>
 
             <div className="pt-8">
               <div className="w-24 h-1 bg-slate-900 mx-auto md:mx-0" />
