@@ -16,8 +16,9 @@ export const cloudinaryStorage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "inkjunction",
-    allowed_formats: ["jpg", "jpeg", "png", "webp", "mp4", "webm"],
+    allowed_formats: ["jpg", "jpeg", "png", "webp", "mp4", "webm", "gif", "heic", "heif"],
     resource_type: "auto", // handles both images and videos
+    // No transformation — upload original quality at any size
   },
 });
 

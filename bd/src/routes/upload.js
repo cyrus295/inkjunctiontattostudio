@@ -39,7 +39,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: isCloudinaryConfigured ? cloudinaryStorage : localStorage,
   fileFilter,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
+  // No file size limit — accept any size
 });
 
 // POST /api/upload
