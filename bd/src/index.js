@@ -88,6 +88,54 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// One-time seed endpoint — protected by SEED_SECRET env var
+app.get("/api/seed", async (req, res) => {
+  const secret = req.query.secret;
+  if (!secret || secret !== process.env.SEED_SECRET) {
+    return res.status(401).json({ error: "Unauthorized — provide ?secret=YOUR_SEED_SECRET" });
+  }
+
+  try {
+    const { prisma } = await import("./config/db.js");
+
+    const portraitItems = [
+      { type: "image", src: "https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=800&q=80", style: "Portrait", caption: "Realistic Face Portrait", beforeSrc: null },
+      { type: "image", src: "https://images.unsplash.com/photo-1590246815117-6ca7632c2b11?w=800&q=80", style: "Portrait", caption: "Detailed Eye Portrait", beforeSrc: null },
+      { type: "image", src: "https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=800&q=80", style: "Portrait", caption: "Custom Portrait Design", beforeSrc: null },
+    ];
+
+    const coverupItems = [
+      { type: "image", src: "https://images.unsplash.com/photo-1564415315949-7a0c4b9b06d0?w=800&q=80", style: "Coverup", caption: "Rose Coverup Transformation", beforeSrc: "https://images.unsplash.com/photo-1527090526205-beaac8dc3c62?w=800&q=80" },
+      { type: "image", src: "https://images.unsplash.com/photo-1542856391-010fb87dcfed?w=800&q=80", style: "Coverup", caption: "Dragon Sleeve Coverup", beforeSrc: "https://images.unsplash.com/photo-1612538498456-e861df91d4d0?w=800&q=80" },
+    ];
+
+    // Only add if not already seeded
+    const existingPortrait = await prisma.portfolio.count({ where: { style: "Portrait" } });
+    const existingCoverup = await prisma.portfolio.count({ where: { style: "Coverup" } });
+
+    let added = 0;
+    if (existingPortrait === 0) {
+      await prisma.portfolio.createMany({ data: portraitItems });
+      added += portraitItems.length;
+    }
+    if (existingCoverup === 0) {
+      await prisma.portfolio.createMany({ data: coverupItems });
+      added += coverupItems.length;
+    }
+
+    const total = await prisma.portfolio.count();
+    res.json({
+      success: true,
+      message: added > 0 ? `Added ${added} items` : "Already seeded — nothing to add",
+      totalPortfolioItems: total,
+      portrait: existingPortrait === 0 ? "added" : "already exists",
+      coverup: existingCoverup === 0 ? "added" : "already exists",
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Socket.IO connection
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
