@@ -3,7 +3,8 @@ import { connectDB, prisma } from "./config/db.js";
 
 dotenv.config();
 
-const imagesInDir = [
+// Local images served via /img/ route (work in development)
+const localImages = [
   "1/20250325_173111.jpg.jpeg",
   "1/20250412_162526.jpg.jpeg",
   "1/20250502_145742.jpg.jpeg",
@@ -45,28 +46,83 @@ const imagesInDir = [
   "1/mini/tatto6.jpeg",
   "1/mini/tatto7.jpeg",
   "1/mini/tatto8.jpeg",
-  "1/mini/tatto9.jpeg"
+  "1/mini/tatto9.jpeg",
 ];
 
+const styles = [
+  "Traditional", "Realism", "Blackwork", "Watercolor",
+  "Geometric", "Japanese", "Dotwork", "New School"
+];
+
+// Portrait items — shown in Portrait Tattoos section
+const portraitItems = [
+  {
+    type: "image",
+    src: "https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=800&q=80",
+    style: "Portrait",
+    caption: "Realistic Face Portrait",
+    beforeSrc: null,
+  },
+  {
+    type: "image",
+    src: "https://images.unsplash.com/photo-1590246815117-6ca7632c2b11?w=800&q=80",
+    style: "Portrait",
+    caption: "Detailed Eye Portrait",
+    beforeSrc: null,
+  },
+  {
+    type: "image",
+    src: "https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=800&q=80",
+    style: "Portrait",
+    caption: "Custom Portrait Design",
+    beforeSrc: null,
+  },
+];
+
+// Coverup items — shown in Coverup Magic section (need beforeSrc)
+const coverupItems = [
+  {
+    type: "image",
+    src: "https://images.unsplash.com/photo-1564415315949-7a0c4b9b06d0?w=800&q=80",
+    style: "Coverup",
+    caption: "Rose Coverup Transformation",
+    beforeSrc: "https://images.unsplash.com/photo-1527090526205-beaac8dc3c62?w=800&q=80",
+  },
+  {
+    type: "image",
+    src: "https://images.unsplash.com/photo-1542856391-010fb87dcfed?w=800&q=80",
+    style: "Coverup",
+    caption: "Dragon Sleeve Coverup",
+    beforeSrc: "https://images.unsplash.com/photo-1612538498456-e861df91d4d0?w=800&q=80",
+  },
+];
+
+// Video item
 const videoItems = [
   {
     type: "video",
     src: "https://assets.mixkit.co/videos/preview/mixkit-ink-swirling-in-water-186-large.mp4",
     style: "Artistic",
-    caption: "Ink Motion Study"
-  }
+    caption: "Ink Motion Study",
+    beforeSrc: null,
+  },
 ];
 
-const styles = ["Traditional", "Realism", "Blackwork", "Watercolor", "Geometric", "Japanese", "Dotwork", "New School"];
-
 const seedData = [
-  ...imagesInDir.map((img, index) => ({
+  // Main portfolio from local images
+  ...localImages.map((img, index) => ({
     type: "image",
     src: `/img/${img}`,
     style: styles[index % styles.length],
-    caption: `Custom ${styles[index % styles.length]} Design`
+    caption: `Custom ${styles[index % styles.length]} Design`,
+    beforeSrc: null,
   })),
-  ...videoItems
+  // Portrait section items
+  ...portraitItems,
+  // Coverup section items
+  ...coverupItems,
+  // Video
+  ...videoItems,
 ];
 
 const seedDatabase = async () => {
@@ -81,6 +137,11 @@ const seedDatabase = async () => {
     });
 
     console.log(` Seeded ${insertedItems.count} portfolio items`);
+    console.log(`   - ${localImages.length} main portfolio images`);
+    console.log(`   - ${portraitItems.length} portrait items`);
+    console.log(`   - ${coverupItems.length} coverup items`);
+    console.log(`   - ${videoItems.length} video items`);
+
     await prisma.$disconnect();
     process.exit(0);
   } catch (error) {
