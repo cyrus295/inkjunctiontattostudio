@@ -91,8 +91,11 @@ app.get("/api/health", (req, res) => {
 // One-time seed endpoint — protected by SEED_SECRET env var
 app.get("/api/seed", async (req, res) => {
   const secret = req.query.secret;
-  if (!secret || secret !== process.env.SEED_SECRET) {
-    return res.status(401).json({ error: "Unauthorized — provide ?secret=YOUR_SEED_SECRET" });
+  const expectedSecret = process.env.SEED_SECRET;
+
+  // If SEED_SECRET is set, validate it. If not set, allow access (first-time setup).
+  if (expectedSecret && secret !== expectedSecret) {
+    return res.status(401).json({ error: "Unauthorized — wrong secret" });
   }
 
   try {
