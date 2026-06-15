@@ -3,9 +3,11 @@ import axios from "axios";
 import { io } from "socket.io-client";
 import { portfolioItems as mockPortfolioItems } from "../data/portfolio.js";
 
-// Use environment variables for API and Socket URLs
-const SOCKET_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : "http://localhost:5000";
+// API URL for REST calls
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+// Socket URL — strip /api from the end
+const SOCKET_URL = API_URL.replace(/\/api$/, "");
 
 export const useData = () => {
   const [portfolio, setPortfolio] = useState(mockPortfolioItems);
@@ -16,26 +18,22 @@ export const useData = () => {
 
   useEffect(() => {
     let socket;
-    
+
     const fetchData = async () => {
       try {
         setLoading(true);
-        console.log("Fetching data from:", API_URL);
-        
-        // Try fetching portfolio
-        const portfolioRes = await axios.get(`${API_URL}/portfolio`);
+
+        const [portfolioRes, contentRes, offersRes] = await Promise.all([
+          axios.get(`${API_URL}/portfolio`),
+          axios.get(`${API_URL}/content`),
+          axios.get(`${API_URL}/offers`),
+        ]);
+
         if (Array.isArray(portfolioRes.data) && portfolioRes.data.length > 0) {
           setPortfolio(portfolioRes.data);
         }
-        
-        // Try fetching content
-        const contentRes = await axios.get(`${API_URL}/content`);
         setContent(contentRes.data || {});
-
-        // Try fetching offers
-        const offersRes = await axios.get(`${API_URL}/offers`);
         setOffers(offersRes.data || []);
-        
         setBackendConnected(true);
       } catch (error) {
         console.warn("Backend connection failed, using mock data:", error.message);
@@ -47,16 +45,23 @@ export const useData = () => {
 
     fetchData();
 
-    // Initialize socket with better error handling
+    // Socket.IO — polling first (required for Render), then upgrade to websocket
     try {
       socket = io(SOCKET_URL, {
-        transports: ['websocket', 'polling'],
-        reconnectionAttempts: 5
+        transports: ["polling", "websocket"],
+        reconnectionAttempts: 10,
+        reconnectionDelay: 2000,
+        timeout: 20000,
+        withCredentials: true,
       });
 
       socket.on("connect", () => {
         console.log("Socket connected:", socket.id);
         setBackendConnected(true);
+      });
+
+      socket.on("disconnect", (reason) => {
+        console.warn("Socket disconnected:", reason);
       });
 
       socket.on("connect_error", (error) => {
@@ -76,10 +81,7 @@ export const useData = () => {
       });
 
       socket.on("contentUpdated", (data) => {
-        setContent((prev) => ({
-          ...prev,
-          [data.key]: data.value,
-        }));
+        setContent((prev) => ({ ...prev, [data.key]: data.value }));
       });
 
       socket.on("offersUpdated", (data) => {
@@ -104,11 +106,13 @@ export const useData = () => {
 
   const refreshData = async () => {
     try {
-      const portfolioRes = await axios.get(`${API_URL}/portfolio`);
+      const [portfolioRes, contentRes, offersRes] = await Promise.all([
+        axios.get(`${API_URL}/portfolio`),
+        axios.get(`${API_URL}/content`),
+        axios.get(`${API_URL}/offers`),
+      ]);
       setPortfolio(portfolioRes.data);
-      const contentRes = await axios.get(`${API_URL}/content`);
       setContent(contentRes.data);
-      const offersRes = await axios.get(`${API_URL}/offers`);
       setOffers(offersRes.data);
       setBackendConnected(true);
     } catch (error) {

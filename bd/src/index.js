@@ -23,14 +23,19 @@ const httpServer = createServer(app);
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   "http://localhost:5173",
-  "http://localhost:4173", // vite preview
+  "http://localhost:4173",
 ].filter(Boolean);
 
 const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
+    // Allow exact matches
     if (allowedOrigins.includes(origin)) return callback(null, true);
+    // Allow all Vercel preview deployments for this project
+    if (origin.endsWith(".vercel.app")) return callback(null, true);
+    // Allow inkjunction.com and subdomains
+    if (origin.endsWith("inkjunction.com")) return callback(null, true);
     callback(new Error(`CORS: origin ${origin} not allowed`));
   },
   credentials: true,
@@ -39,7 +44,13 @@ const corsOptions = {
 
 const io = new Server(httpServer, {
   cors: {
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      if (origin.endsWith(".vercel.app")) return callback(null, true);
+      if (origin.endsWith("inkjunction.com")) return callback(null, true);
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
