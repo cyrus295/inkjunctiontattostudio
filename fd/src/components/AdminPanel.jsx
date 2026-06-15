@@ -221,6 +221,7 @@ const AdminPanel = () => {
           <nav className="space-y-2 sticky top-28">
             {[
               { id: "portfolio", label: "Portfolio", icon: LayoutDashboard },
+              { id: "coverup", label: "Coverup", icon: ImageIcon },
               { id: "media", label: "Media Hub", icon: Video },
               { id: "offers", label: "Active Offers", icon: Tag },
             ].map((tab) => (
@@ -336,6 +337,94 @@ const AdminPanel = () => {
             </div>
           )}
 
+          {activeTab === "coverup" && (
+            <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              {/* Add Coverup Item */}
+              <div className="bg-black border border-white/5 rounded-sm shadow-2xl overflow-hidden">
+                <div className="px-10 py-8 border-b border-white/5 bg-zinc-950/50">
+                  <h2 className="font-black text-white uppercase tracking-widest text-sm">Add Coverup — Before & After</h2>
+                </div>
+                <div className="p-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
+                  <div className="space-y-8">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mb-3">Title</label>
+                      <input type="text" value={newItem.style === "Coverup" ? newItem.caption : ""} onChange={(e) => setNewItem({...newItem, caption: e.target.value, style: "Coverup"})} placeholder="e.g. Rose Sleeve Transformation" className="w-full bg-[#0a0a0a] border border-white/10 rounded-sm px-5 py-4 text-white focus:border-white outline-none transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mb-3">Before Image</label>
+                      <div className="flex gap-4">
+                        <input type="text" value={newItem.beforeSrc} onChange={(e) => setNewItem({...newItem, beforeSrc: e.target.value, style: "Coverup"})} placeholder="Before image URL..." className="flex-1 bg-[#0a0a0a] border border-white/10 rounded-sm px-5 py-4 text-white focus:border-white outline-none transition-all" />
+                        <label className="cursor-pointer bg-slate-700 hover:bg-slate-600 text-white px-6 flex items-center justify-center rounded-sm transition-all shadow-lg active:scale-95">
+                          <Upload size={18} />
+                          <input type="file" className="hidden" onChange={(e) => handleFileUpload(e, "portfolio", true, null, true)} />
+                        </label>
+                      </div>
+                      {newItem.beforeSrc && (
+                        <div className="mt-3 relative aspect-video rounded-sm overflow-hidden bg-black border border-white/10">
+                          <img src={newItem.beforeSrc?.startsWith('http') ? newItem.beforeSrc : `${SOCKET_URL}${newItem.beforeSrc}`} className="w-full h-full object-cover" />
+                          <div className="absolute top-2 left-2 bg-black/80 text-white px-3 py-1 rounded-full text-[10px] font-black tracking-widest">BEFORE</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="space-y-8">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mb-3">After Image / Video</label>
+                      <div className="flex gap-4">
+                        <input type="text" value={newItem.style === "Coverup" ? newItem.src : ""} onChange={(e) => setNewItem({...newItem, src: e.target.value, style: "Coverup"})} placeholder="After image URL..." className="flex-1 bg-[#0a0a0a] border border-white/10 rounded-sm px-5 py-4 text-white focus:border-white outline-none transition-all" />
+                        <label className="cursor-pointer bg-green-600 hover:bg-green-500 text-black px-6 flex items-center justify-center rounded-sm transition-all shadow-lg active:scale-95">
+                          <Upload size={18} />
+                          <input type="file" className="hidden" onChange={(e) => { setNewItem({...newItem, style: "Coverup"}); handleFileUpload(e, "portfolio", true); }} />
+                        </label>
+                      </div>
+                      {newItem.src && newItem.style === "Coverup" && (
+                        <div className="mt-3 relative aspect-video rounded-sm overflow-hidden bg-black border border-white/10">
+                          <img src={newItem.src?.startsWith('http') ? newItem.src : `${SOCKET_URL}${newItem.src}`} className="w-full h-full object-cover" />
+                          <div className="absolute top-2 left-2 bg-green-600 text-white px-3 py-1 rounded-full text-[10px] font-black tracking-widest">AFTER</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="px-10 py-8 bg-zinc-950/50 border-t border-white/5 flex justify-end">
+                  <button
+                    onClick={() => {
+                      setNewItem({...newItem, style: "Coverup"});
+                      handleAddPortfolio();
+                    }}
+                    disabled={uploading}
+                    className="bg-white hover:bg-slate-200 text-black px-12 py-4 rounded-sm font-bold uppercase tracking-[0.2em] text-xs transition-all flex items-center gap-4 disabled:opacity-50"
+                  >
+                    <Plus size={18} />
+                    {uploading ? "Uploading..." : "Publish Coverup"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Existing Coverup Items */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {portfolio.filter(item => item.style?.toLowerCase() === "coverup").map((item) => (
+                  <div key={item._id} className="bg-black border border-white/5 rounded-sm overflow-hidden group hover:border-white/20 transition-all duration-500">
+                    <div className="grid grid-cols-2 gap-2 p-4 bg-zinc-950/50">
+                      <div className="relative aspect-square rounded-sm overflow-hidden bg-zinc-900">
+                        <img src={item.beforeSrc?.startsWith('http') ? item.beforeSrc : `${SOCKET_URL}${item.beforeSrc}`} className="w-full h-full object-cover" />
+                        <div className="absolute top-2 left-2 bg-black/80 text-white px-2 py-0.5 rounded-full text-[9px] font-black">BEFORE</div>
+                      </div>
+                      <div className="relative aspect-square rounded-sm overflow-hidden bg-zinc-900">
+                        <img src={item.src?.startsWith('http') ? item.src : `${SOCKET_URL}${item.src}`} className="w-full h-full object-cover" />
+                        <div className="absolute top-2 left-2 bg-green-600 text-white px-2 py-0.5 rounded-full text-[9px] font-black">AFTER</div>
+                      </div>
+                    </div>
+                    <div className="p-4 flex justify-between items-center">
+                      <p className="text-xs font-bold text-white uppercase tracking-widest truncate">{item.caption}</p>
+                      <button onClick={() => handleDeletePortfolio(item._id)} className="bg-red-600/10 text-red-500 p-2 rounded-sm hover:bg-red-600 hover:text-white transition-all ml-4"><Trash2 size={16} /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {activeTab === "media" && (
             <div className="space-y-12">
               <div className="bg-zinc-900/50 border border-white/5 rounded-[2rem] shadow-2xl overflow-hidden backdrop-blur-sm">
@@ -355,13 +444,8 @@ const AdminPanel = () => {
                   {/* Studio Environment Media */}
                   <section>
                     <h3 className="text-[10px] font-black text-green-500 uppercase tracking-[0.3em] mb-6 flex items-center gap-3"><div className="w-2 h-2 bg-green-500 rounded-full"></div>The Studio Environment</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      <MediaUploadField label="Environment Clip 1 (Main)" contentKey="envMedia1" type="video" />
-                      <MediaUploadField label="Environment Clip 2" contentKey="envMedia2" type="video" />
-                      <MediaUploadField label="Environment Clip 3" contentKey="envMedia3" type="video" />
-                      <MediaUploadField label="Environment Clip 4" contentKey="envMedia4" type="video" />
-                      <MediaUploadField label="Environment Clip 5" contentKey="envMedia5" type="video" />
-                      <MediaUploadField label="Environment Clip 6" contentKey="envMedia6" type="video" />
+                    <div className="grid grid-cols-1 gap-6">
+                      <MediaUploadField label="Studio Environment Video (envi.mp4)" contentKey="envMedia1" type="video" />
                     </div>
                   </section>
 
