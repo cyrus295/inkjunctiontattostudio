@@ -15,6 +15,9 @@ const AdminPanel = () => {
   // Dedicated Coverup state — completely separate from portfolio
   const [newCoverup, setNewCoverup] = useState({ caption: "", beforeSrc: "", src: "" });
 
+  // Dedicated Portrait state
+  const [newPortrait, setNewPortrait] = useState({ src: "", caption: "" });
+
   // Offer State
   const [editingOffer, setEditingOffer] = useState(null);
   const [newOffer, setNewOffer] = useState({ title: "", description: "", type: "image", src: "", isActive: true, expiresAt: "" });
@@ -192,6 +195,44 @@ const AdminPanel = () => {
     }
   };
 
+  // Portrait handler
+  const handlePortraitUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    setUploading(true);
+    try {
+      const res = await axios.post(`${API_URL}/upload`, formData);
+      setNewPortrait(prev => ({ ...prev, src: res.data.url }));
+      showAlert("success", "Portrait image uploaded!");
+    } catch {
+      showAlert("error", "Upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleAddPortrait = async () => {
+    if (!newPortrait.src || !newPortrait.caption) {
+      return showAlert("error", "Please add a title and upload an image");
+    }
+    try {
+      await axios.post(`${API_URL}/portfolio`, {
+        type: "image",
+        src: newPortrait.src,
+        beforeSrc: null,
+        style: "Portrait",
+        caption: newPortrait.caption,
+      });
+      setNewPortrait({ src: "", caption: "" });
+      showAlert("success", "Portrait published!");
+      refreshData();
+    } catch {
+      showAlert("error", "Failed to publish portrait.");
+    }
+  };
+
   const MediaUploadField = ({ label, contentKey, type = "video" }) => {
     const currentVal = content[contentKey];
     const fullUrl = currentVal?.startsWith('http') ? currentVal : `${SOCKET_URL}${currentVal}`;
@@ -262,6 +303,7 @@ const AdminPanel = () => {
           <nav className="space-y-2 sticky top-28">
             {[
               { id: "portfolio", label: "Portfolio", icon: LayoutDashboard },
+              { id: "portrait", label: "Portrait", icon: ImageIcon },
               { id: "media", label: "Media Hub", icon: Video },
               { id: "offers", label: "Active Offers", icon: Tag },
             ].map((tab) => (
@@ -499,6 +541,111 @@ const AdminPanel = () => {
                     <div className="col-span-2 text-center py-16 text-slate-600 border border-white/5 rounded-sm">
                       <p className="font-bold uppercase tracking-widest text-sm">No coverup items yet</p>
                       <p className="text-xs mt-2">Add your first before & after above</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "portrait" && (
+            <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+
+              {/* Add Portrait */}
+              <div className="bg-black border border-white/5 rounded-sm shadow-2xl overflow-hidden">
+                <div className="px-10 py-8 border-b border-white/5 bg-zinc-950/50">
+                  <h2 className="font-black text-white uppercase tracking-widest text-sm">Add Portrait Tattoo</h2>
+                  <p className="text-slate-500 text-xs mt-1">Upload hyper-realistic portrait tattoo photos</p>
+                </div>
+                <div className="p-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
+                  <div className="space-y-8">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mb-3">Title / Caption</label>
+                      <input
+                        type="text"
+                        value={newPortrait.caption}
+                        onChange={(e) => setNewPortrait(prev => ({ ...prev, caption: e.target.value }))}
+                        placeholder="e.g. Realistic Face Portrait"
+                        className="w-full bg-[#0a0a0a] border border-white/10 rounded-sm px-5 py-4 text-white focus:border-white outline-none transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mb-3">Upload Portrait Image</label>
+                      <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-white/20 rounded-sm cursor-pointer hover:border-green-500/40 transition-all bg-zinc-950/50 group">
+                        {newPortrait.src ? (
+                          <div className="relative w-full h-full">
+                            <img src={newPortrait.src} className="w-full h-full object-cover rounded-sm" />
+                            <button
+                              type="button"
+                              onClick={(e) => { e.preventDefault(); setNewPortrait(prev => ({ ...prev, src: "" })); }}
+                              className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full hover:bg-red-500"
+                            ><X size={14} /></button>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center gap-3 text-slate-500 group-hover:text-green-500 transition-colors">
+                            <Upload size={40} />
+                            <span className="text-xs font-bold uppercase tracking-widest">Click to upload portrait image</span>
+                            <span className="text-[10px] text-slate-600">JPG, PNG, WEBP up to 50MB</span>
+                          </div>
+                        )}
+                        <input type="file" className="hidden" accept="image/*" onChange={handlePortraitUpload} />
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Preview */}
+                  {newPortrait.src && (
+                    <div className="space-y-4">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">Preview</label>
+                      <div className="relative rounded-sm overflow-hidden bg-black border border-white/10 group">
+                        <img src={newPortrait.src} className="w-full h-[350px] object-cover group-hover:scale-105 transition-transform duration-700" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                          <p className="text-white font-black uppercase tracking-widest text-lg italic">{newPortrait.caption || "Portrait"}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="px-10 py-8 bg-zinc-950/50 border-t border-white/5 flex justify-end">
+                  <button
+                    onClick={handleAddPortrait}
+                    disabled={uploading || !newPortrait.src || !newPortrait.caption}
+                    className="bg-white hover:bg-slate-200 text-black px-12 py-4 rounded-sm font-bold uppercase tracking-[0.2em] text-xs transition-all flex items-center gap-4 disabled:opacity-40"
+                  >
+                    <Plus size={18} />
+                    {uploading ? "Uploading..." : "Publish Portrait"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Existing Portrait Items */}
+              <div>
+                <h3 className="font-black text-white uppercase tracking-widest text-sm mb-6">
+                  Published Portraits ({portfolio.filter(i => i.style?.toLowerCase() === "portrait").length})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {portfolio.filter(item => item.style?.toLowerCase() === "portrait").map((item) => (
+                    <div key={item._id} className="bg-black border border-white/5 rounded-sm overflow-hidden group hover:border-white/20 transition-all duration-500">
+                      <div className="aspect-square bg-[#0a0a0a] relative overflow-hidden">
+                        <img
+                          src={item.src?.startsWith('http') ? item.src : `${SOCKET_URL}${item.src}`}
+                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+                        />
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                          <button onClick={() => handleDeletePortfolio(item._id)} className="bg-red-600 text-white p-4 rounded-sm hover:bg-red-500 transition-all">
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="p-4 bg-zinc-950/50">
+                        <p className="text-xs font-bold text-white uppercase tracking-widest truncate">{item.caption}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {portfolio.filter(item => item.style?.toLowerCase() === "portrait").length === 0 && (
+                    <div className="col-span-3 text-center py-16 text-slate-600 border border-white/5 rounded-sm">
+                      <p className="font-bold uppercase tracking-widest text-sm">No portrait items yet</p>
+                      <p className="text-xs mt-2">Upload your first portrait above</p>
                     </div>
                   )}
                 </div>
