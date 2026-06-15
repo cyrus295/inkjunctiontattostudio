@@ -18,7 +18,8 @@ export function PortraitTattoos() {
   );
 
   const displayItems = portraitItems.length > 0 ? portraitItems : defaultPortraitTattoos;
-  const marqueeItems = [...displayItems, ...displayItems, ...displayItems];
+  // Double for seamless loop — not triple
+  const marqueeItems = [...displayItems, ...displayItems];
 
   const normalizeSrc = (src) => {
     if (src.startsWith('http') || src.startsWith('data:')) return src;

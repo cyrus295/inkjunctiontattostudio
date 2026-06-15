@@ -19,12 +19,14 @@ export function Portfolio() {
     return { ...item, src };
   };
 
-  const loadMore = () => {
-    setVisibleItems((prev) => Math.min(prev + 6, items.length));
-  };
+  // Exclude Portrait and Coverup — those have their own sections
+  const filteredItems = items.filter(item =>
+    item.style?.toLowerCase() !== "portrait" &&
+    item.style?.toLowerCase() !== "coverup"
+  );
 
-  // Double the items for seamless marquee
-  const marqueeItems = [...items, ...items];
+  // Double for seamless marquee loop
+  const marqueeItems = [...filteredItems, ...filteredItems];
 
   return (
     <section id="portfolio" className="py-20 overflow-hidden bg-slate-50">
