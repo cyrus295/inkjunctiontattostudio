@@ -91,6 +91,21 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || "Something went wrong!" });
 });
 
+// Self-ping to prevent Render free tier cold start (every 14 minutes)
+const keepAlive = () => {
+  const url = process.env.RENDER_EXTERNAL_URL;
+  if (process.env.NODE_ENV === "production" && url) {
+    setInterval(async () => {
+      try {
+        await fetch(`${url}/api/health`);
+        console.log(" Keep-alive ping sent");
+      } catch (e) {
+        console.warn(" Keep-alive ping failed:", e.message);
+      }
+    }, 14 * 60 * 1000); // every 14 minutes
+  }
+};
+
 // Start server
 const startServer = async () => {
   try {
@@ -99,6 +114,7 @@ const startServer = async () => {
       console.log(` Server running on port ${PORT}`);
       console.log(` Environment: ${process.env.NODE_ENV}`);
       console.log(` Allowed origins: ${allowedOrigins.join(", ")}`);
+      keepAlive();
     });
   } catch (error) {
     console.error("Failed to start server:", error);
